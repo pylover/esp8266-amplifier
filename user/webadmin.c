@@ -379,7 +379,7 @@ httpd_err_t webadmin_params_get(struct httpd_session *s) {
     "\"name\": \"%s\"," \
     "\"apPsk\": \"%s\"," \
     "\"ssid\": \"%s\"," \
-    "\"psk\": \"%s\"" \
+    "\"psk\": \"%s\"," \
     "\"psu\": \"%s\"" \
     "}"
 
