@@ -11,7 +11,7 @@
 #     a generated lib/image xxx.a ()
 #
 
-HOST ?= dev.foo
+HOST ?= h.amp
 COMPILE ?= gcc
 
 SPI_SIZE_MAP := 6
