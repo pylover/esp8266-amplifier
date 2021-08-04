@@ -37,6 +37,31 @@ const sysinfo = [
   { title: 'Free Memory', value: 'free'},
   { title: 'RTC', value: 'rtc'},
 ];
+
+// async function onoff(event) {
+//   const res = await fetch('/', {method: 'PLAYPAUSE'});
+// }
+async function play(event) {
+  const res = await fetch('/', {method: 'PLAYPAUSE'});
+}
+async function next(event) {
+  const res = await fetch('/', {method: 'NEXT'});
+}
+async function previous(event) {
+  const res = await fetch('/', {method: 'PREVIOUS'});
+}
+async function volup(event) {
+  const res = await fetch('/', {method: 'VOLUP'});
+}
+async function voldown(event) {
+  const res = await fetch('/', {method: 'VOLDOWN'});
+}
+async function mute(event) {
+  const res = await fetch('/', {method: 'MUTE'});
+}
+async function unmute(event) {
+  const res = await fetch('/', {method: 'UNMUTE'});
+}
 </script>
 
 <style type="text/sass">
@@ -53,6 +78,18 @@ const sysinfo = [
 </style>
 
 <div id="index">
+  <Section title="Amplifier" icon="music" />
+  <div class="all10 row">
+    <!--Button icon="switch" on:click={onoff} /-->
+    <Button icon="previous" on:click={previous} />
+    <Button icon="play" on:click={play} />
+    <Button icon="next" on:click={next} />
+    <Button icon="volup" on:click={volup} />
+    <Button icon="voldown" on:click={voldown} />
+    <Button icon="mute" on:click={mute} />
+    <Button icon="unmute" on:click={unmute} />
+  </div>
+
   <Section title="System Status" icon="stats-dots" />
   {#each sysinfo as n, i}
     <div class="all10 row">
@@ -67,34 +104,11 @@ const sysinfo = [
     <Button title="Toggle Boot" icon="loop2" on:click={toggleBoot} />
   </div>
 
-  <Section title="Source Code" icon="github" />
-  <p>
-   Checkout these repositories to find the source code and figure out how to 
-   cook it!
-  </p>
-  <ul>
-    <li>
-      <a href="https://github.com/pylover/esp8266-env">
-       https://github.com/pylover/esp8266-env</a>
-    </li>
-    <li>
-      <a href="https://github.com/pylover/esp8266-fota">
-       https://github.com/pylover/esp8266-fota</a>
-    </li>
-  </ul>
-
-  <Section title="Bug Report" icon="bug" />
-  <p>
-    Visit 
-    <a href="https://github.com/pylover/esp8266-fota/issues">here</a>
-    to submit any issue.
-  </p>
-
   <Section title="Command Line Interface" icon="terminal" />
   <p>
     You may install 
     <a href="https://github.com/pylover/unspy">unspy</a>
-    to control the device via CLI.
+    to control the device using command line interface.
   </p>
 </div>
 

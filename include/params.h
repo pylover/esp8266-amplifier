@@ -14,13 +14,15 @@
 #define PARAMS_MAGIC '@'
 
 
-#define PARAMS_PRINT(p) INFO(CR"%s.%s, ssid: %s psk: %s ap-psk: %s", \
-			p.zone, \
-			p.name, \
-			p.station_ssid, \
-			p.station_psk, \
-			p.ap_psk \
-		)
+#define PARAMS_PRINT(p) \
+    INFO(CR"%s.%s, ssid: %s psk: %s ap-psk: %s PSMCU: %s", \
+		p.zone, \
+		p.name, \
+		p.station_ssid, \
+		p.station_psk, \
+		p.ap_psk, \
+        p.psu \
+	)
 
 #ifndef PARAMS_ZONE_MAXLEN
 #define PARAMS_ZONE_MAXLEN  32
@@ -32,12 +34,13 @@
 
 
 struct params {
-	 char zone[PARAMS_ZONE_MAXLEN];
-	 char name[PARAMS_NAME_MAXLEN];
-	 char ap_psk[32];
-	 char station_ssid[32];
-	 char station_psk[32];
-	 char magic;
+	char zone[PARAMS_ZONE_MAXLEN];
+	char name[PARAMS_NAME_MAXLEN];
+	char ap_psk[32];
+	char station_ssid[32];
+	char station_psk[32];
+	char magic;
+    char psu[32];
 };
 
 

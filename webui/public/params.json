@@ -3,5 +3,6 @@
   "name": "node",
   "apPsk": "foobarbaz",
   "ssid": "foo",
-  "psk": "foobarbaz"
+  "psk": "foobarbaz",
+  "psu": "dev.psu"
 }

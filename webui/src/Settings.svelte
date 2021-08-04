@@ -1,12 +1,12 @@
 <script>
 import { onMount } from 'svelte';
 import Button from './Button.svelte';
+import Section from './Section.svelte';
 
 let disabled = true;
 let p = {};
 
 onMount(async () => {
-  //document.title = title;
   const res = await fetch(`/params.json`);
   if (res.ok) {
     p = await res.json();
@@ -24,7 +24,8 @@ async function submit(event) {
     'name':     p.name,
     'ap_psk':   p.apPsk,
     'ssid':     p.ssid,
-    'psk':      p.psk
+    'psk':      p.psk,
+    'psu':      p.psu
   };
 
   var form = [];
@@ -45,24 +46,20 @@ async function submit(event) {
 
 }
 </script>
-<style type="text/sass">
+<style type="text/sass" scoped>
 @import 'styles/variables.sass'
 
-#wifi form > .row
-  margin-bottom: $gutter * 2
+form > .row > div:first-child
+    margin-top: $gutter * 2
+    margin-bottom: $gutter
 </style>
-
-
-<h4 class="all10 section">
-  <svg class="all1"><use xlink:href="#icon-connection"></use></svg>
-  WIFI Settings
-</h4>
 
 <p style="display: {disabled? 'block': 'none'}" >
   Cannot load params.
 </p>
-<div id="wifi" class="row" style="display: {disabled? 'none': 'block'}">
+<div id="settings" class="row" style="display: {disabled? 'none': 'block'}">
   <form>
+  <Section title="Connection" icon="connection" />
   <div class="row all10">
     <div class="all10">Zone:</div>
     <div class="all10">
@@ -91,6 +88,13 @@ async function submit(event) {
     <div class="all10">PSK</div>
     <div class="all10">
       <input name="psk" bind:value="{p.psk}" {disabled}/>    
+    </div>
+  </div>
+  <Section title="Power Supply" icon="switch" />
+  <div class="row all10">
+    <div class="all10">PSU Name</div>
+    <div class="all10">
+      <input name="psu" bind:value="{p.psu}" {disabled}/>    
     </div>
   </div>
   <div class="row all10">

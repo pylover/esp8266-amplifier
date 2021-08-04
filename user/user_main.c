@@ -6,7 +6,10 @@
 #include "debug.h"
 #include "status.h"
 #include "uns.h"
-#include "interrupt.h"
+#include "amp.h"
+#include "ir.h"
+#include "bt.h"
+#include "http.h"
 
 // SDK
 #include <ets_sys.h>
@@ -22,6 +25,76 @@
 static bool configured;
 static struct params params;
 
+// FIXME: Update it during boot
+static int powerstatus = 0;
+
+#define HTTPSTATUS_POWERON  700
+#define HTTPSTATUS_POWEROFF  701
+
+void enableirr() {
+    irr_enable();
+    status_update(100, 100, 1, NULL);
+}
+
+
+void poweron_cb() {
+    AMP_UNMUTE();
+    enableirr();
+}
+
+void httpcb(int status, char * body, void *args) {
+    DEBUG("HTTP callback: %d\n", status);
+    if (status == HTTPSTATUS_POWERON) {
+        DEBUG("Power is On\n");
+        powerstatus = 1;
+        status_update(100, 100, 15, poweron_cb);
+    }
+    else if (status == HTTPSTATUS_POWEROFF) {
+        DEBUG("Power is Off\n");
+        powerstatus = 0;
+        BT_PLAYPAUSE();
+    }
+}
+
+
+void ir_cmd(uint16_t code, bool toggle) {
+    /* Ir is disabled by just before calling this callback, So it must enabled
+     * again after processing message
+     */
+    status_update(100, 1, 1, NULL);
+    switch (code) {
+        case IRCMD_POWER:
+            AMP_MUTE();
+            status_update(500, 100, 0, NULL);
+            http_nobody_uns(params.psu, powerstatus? "OFF": "ON", "/", httpcb, 
+                    NULL);
+            break;
+        case IRCMD_VOLUP:
+            amp_volup();
+            irr_enable();
+            break;
+        case IRCMD_VOLDOWN:
+            amp_voldown();
+            irr_enable();
+            break;
+        case IRCMD_BTPLAYPAUSE:
+            BT_PLAYPAUSE();
+            break;
+        case IRCMD_MUTE:
+            amp_togglemute();
+            status_update(100, 100, 5, enableirr);
+            break;
+        case IRCMD_NEXT:
+            BT_NEXT();
+            break;
+        case IRCMD_PREVIOUS:
+            BT_PREVIOUS();
+            break;
+        default:
+            INFO("Unknown Command: %d, TGL: %d\r\n", code, toggle);
+            irr_enable();
+    }
+}
 
 static ICACHE_FLASH_ATTR 
 void reboot_appmode() {
@@ -105,8 +178,21 @@ void user_init(void) {
     
     INFO("");
     PARAMS_PRINT(params);
-	
-    /* Status LED */
+
+    // Bluetooth
+    bt_init();
+
+    // AMP GPIO setup
+    amp_init();
+
+    // Interrupt, FOTA Button and Infra Red
+    irr_register_callback(ir_cmd);
+    irr_init();
+
+    // Disable wifi led before infrared
+    wifi_status_led_uninstall();
+
+    // Status LED
     status_init();
 
     /* Start WIFI */

@@ -4,6 +4,8 @@
 #include "httpd.h"
 #include "uns.h"
 #include "http.h"
+#include "bt.h"
+#include "amp.h"
 
 #include <upgrade.h>
 #include <osapi.h>
@@ -322,6 +324,9 @@ httpd_err_t _params_cb(struct httpd_session *s, const char *field,
     else if (os_strcmp(field, "psk") == 0) {
         target = params->station_psk;
     }
+    else if (os_strcmp(field, "psu") == 0) {
+        target = params->psu;
+    }
     else {
         return WEBADMIN_UNKNOWNFIELD;;
     }
@@ -375,6 +380,7 @@ httpd_err_t webadmin_params_get(struct httpd_session *s) {
     "\"apPsk\": \"%s\"," \
     "\"ssid\": \"%s\"," \
     "\"psk\": \"%s\"" \
+    "\"psu\": \"%s\"" \
     "}"
 
 
@@ -383,38 +389,10 @@ httpd_err_t webadmin_params_get(struct httpd_session *s) {
             params->name, 
             params->ap_psk, 
             params->station_ssid, 
-            params->station_psk);
+            params->station_psk,
+            params->psu);
     return HTTPD_RESPONSE_JSON(s, HTTPSTATUS_OK, buff, bufflen);
 }
-
-
-//static ICACHE_FLASH_ATTR
-//httpd_err_t webadmin_favicon(struct httpd_session *s) {
-//    #define FAVICON_SIZE    495
-//
-//    #if SPI_SIZE_MAP == 2
-//    #define FAVICON_FLASH_SECTOR    0x77    
-//    #elif SPI_SIZE_MAP == 4
-//    #define FAVICON_FLASH_SECTOR    0x200    
-//    #elif SPI_SIZE_MAP == 6
-//    #define FAVICON_FLASH_SECTOR    0x200    
-//    #endif
-//   
-//
-//    char buf[4 * 124];
-//    //os_memset(buff, 0, 4 * 124);
-//    int result = spi_flash_read(
-//            FAVICON_FLASH_SECTOR * SPI_FLASH_SEC_SIZE,
-//            (uint32_t*) buf,
-//            4 * 124
-//        );
-//    
-//    if (result != SPI_FLASH_RESULT_OK) {
-//        ERROR("SPI Flash write failed: %d", result);
-//        return WEBADMIN_ERR_FLASHREAD;
-//    }
-//    return HTTPD_RESPONSE_ICON(s, HTTPSTATUS_OK, buf, FAVICON_SIZE);
-//}
 
 
 static ICACHE_FLASH_ATTR
@@ -510,24 +488,83 @@ httpd_err_t webadmin_sysinfo(struct httpd_session *s) {
     http_nobody_uns(pattern, "INFO", "/", httpcb, s);
 }
 
+static ICACHE_FLASH_ATTR
+httpd_err_t webadmin_options(struct httpd_session *s) {
+    return HTTPD_RESPONSE_HEAD(s, HTTPSTATUS_OK);
+}
 
-#include "webtest.c"
+static ICACHE_FLASH_ATTR
+httpd_err_t webadmin_playpause(struct httpd_session *s) {
+    DEBUG("Play/Pause Track");
+    BT_PLAYPAUSE();
+    return HTTPD_RESPONSE_HEAD(s, HTTPSTATUS_OK);
+}
+
+static ICACHE_FLASH_ATTR
+httpd_err_t webadmin_next(struct httpd_session *s) {
+    DEBUG("Next Track");
+    BT_NEXT();
+    return HTTPD_RESPONSE_HEAD(s, HTTPSTATUS_OK);
+}
+
+static ICACHE_FLASH_ATTR
+httpd_err_t webadmin_previous(struct httpd_session *s) {
+    DEBUG("Previous Track");
+    BT_PREVIOUS();
+    return HTTPD_RESPONSE_HEAD(s, HTTPSTATUS_OK);
+}
+
+
+static ICACHE_FLASH_ATTR
+httpd_err_t webadmin_volup(struct httpd_session *s) {
+    DEBUG("AMP Volume Up");
+    amp_volup();
+    return HTTPD_RESPONSE_HEAD(s, HTTPSTATUS_OK);
+}
+
+
+static ICACHE_FLASH_ATTR
+httpd_err_t webadmin_voldown(struct httpd_session *s) {
+    DEBUG("AMP Volume Down");
+    amp_voldown();
+    return HTTPD_RESPONSE_HEAD(s, HTTPSTATUS_OK);
+}
+
+
+static ICACHE_FLASH_ATTR
+httpd_err_t webadmin_mute(struct httpd_session *s) {
+    DEBUG("AMP Mute");
+    AMP_MUTE();
+    return HTTPD_RESPONSE_HEAD(s, HTTPSTATUS_OK);
+}
+
+
+static ICACHE_FLASH_ATTR
+httpd_err_t webadmin_unmute(struct httpd_session *s) {
+    DEBUG("AMP Unmute");
+    AMP_UNMUTE();
+    return HTTPD_RESPONSE_HEAD(s, HTTPSTATUS_OK);
+}
+
 
 static struct httpd_route routes[] = {
 
-
     /* Upgrade firmware over the air (wifi) */
     {"UPGRADE",    "/firmware",           webadmin_fw_upgrade     },
+    
+    /* Bluetooth Module */
+    {"PLAYPAUSE", "/",            webadmin_playpause },
+    {"NEXT",      "/",            webadmin_next      },
+    {"PREVIOUS",  "/",            webadmin_previous  },
 
-    /* Under test, needed by webtest.sg &| make test */
-    {"DOWNLOAD",   "/demo/multipartstreams", demo_download_stream   },
-    {"UPLOAD",     "/demo/multipartstreams", demo_multipart_stream  },
-    {"ECHO",       "/demo/multipartforms",   demo_multipart         },
-    {"ECHO",       "/demo/urlencodedforms",  demo_urlencoded        },
-    {"ECHO",       "/demo/queries",          demo_querystring       },
-    {"ECHO",       "/demo/headers",          demo_headersecho       },
-    {"DOWNLOAD",   "/demo",                  demo_download          },
-    {"GET",        "/demo",                  demo_index             },
+    ///* Amplifier Module */
+    {"VOLUP",     "/",            webadmin_volup     },
+    {"VOLDOWN",   "/",            webadmin_voldown   },
+    {"MUTE",      "/",            webadmin_mute      },
+    {"UNMUTE",    "/",            webadmin_unmute    },
+    
+    /* HTTP OPTIONS verb */
+    {"OPTIONS",   "/",            webadmin_options   },
 
     /* Feel free to change these handlers */
     {"DISCOVER",   "/uns",                webadmin_uns_discover   },

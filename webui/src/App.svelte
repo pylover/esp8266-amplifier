@@ -1,13 +1,14 @@
 <script>
 import Icons from './Icons.svelte';
 import Home from './Index.svelte';
-import Wifi from './Wifi.svelte';
+import Settings from './Settings.svelte';
 import Button from './Button.svelte';
 
 export let title;
 const routes = [
-    { title: 'Home', component: Home, path: '/',     icon: 'home'       },
-    { title: 'Wifi', component: Wifi, path: '/wifi', icon: 'connection' },
+  { title: 'Home', component: Home, path: '/',     icon: 'home' },
+  { title: 'Settings', component: Settings, path: '/settings', 
+    icon: 'settings' },
 ];
 
 let selectedIndex = routes.findIndex(e => e.path == window.location.pathname)
